@@ -1,0 +1,12 @@
+{
+	"compilerOptions": {
+		"noEmit": true,
+		"strict": true,
+		"moduleResolution": "node16",
+		"module": "node16",
+		"target": "es2022",
+		"types": ["node"],
+		"allowDefaultProject": true
+	},
+	"include": ["source"]
+}

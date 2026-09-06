@@ -1,4 +1,9 @@
-import chalk, {registerTheme, setActiveTheme, getActiveTheme, setThemeDebug} from '../source/index.js';
+import chalk, {
+	registerTheme,
+	setActiveTheme,
+	getActiveTheme,
+	setThemeDebug,
+} from '../source/index.js';
 
 setThemeDebug(true);
 
