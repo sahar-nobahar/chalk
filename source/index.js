@@ -2,15 +2,9 @@ import {
 	stringReplaceAll,
 	stringEncaseCRLFWithFirstIndex,
 } from './utilities.js';
+import {createTheme as _createTheme} from './theme.js';
 import ansiStyles from '#ansi-styles';
 import supportsColor from '#supports-color';
-import {
-	createTheme as _createTheme,
-	getActiveTheme as _getActiveTheme,
-	setActiveTheme as _setActiveTheme,
-	registerTheme as _registerTheme,
-	setThemeDebug as _setThemeDebug,
-} from './theme.js';
 
 const {stdout: stdoutColor, stderr: stderrColor} = supportsColor;
 
@@ -311,10 +305,11 @@ export {
 };
 
 export {
-	_registerTheme as registerTheme,
-	_setActiveTheme as setActiveTheme,
-	_getActiveTheme as getActiveTheme,
-	_setThemeDebug as setThemeDebug,
-};
+	registerTheme,
+	setActiveTheme,
+	getActiveTheme,
+	setThemeDebug,
+} from './theme.js';
 
 export default chalk;
+

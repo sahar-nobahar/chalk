@@ -155,38 +155,38 @@ test('setActiveTheme: direct object (no name)', t => {
 test('setActiveTheme: unknown name throws', t => {
 	t.throws(
 		() => setActiveTheme('nonexistent'),
-		{message: /not registered/},
+		{message: /not registered/v},
 	);
 });
 
 // --- Error handling ---
 
 test('createTheme: throws for non-object definition', t => {
-	t.throws(() => chalk.createTheme('bad'), {message: /Expected a plain object/});
-	t.throws(() => chalk.createTheme(42), {message: /Expected a plain object/});
-	t.throws(() => chalk.createTheme(null), {message: /Expected a plain object/});
-	t.throws(() => chalk.createTheme(undefined), {message: /Expected a plain object/});
-	t.throws(() => chalk.createTheme([chalk.red]), {message: /Expected a plain object/});
+	t.throws(() => chalk.createTheme('bad'), {message: /Expected a plain object/v});
+	t.throws(() => chalk.createTheme(42), {message: /Expected a plain object/v});
+	t.throws(() => chalk.createTheme(null), {message: /Expected a plain object/v});
+	t.throws(() => chalk.createTheme(undefined), {message: /Expected a plain object/v});
+	t.throws(() => chalk.createTheme([chalk.red]), {message: /Expected a plain object/v});
 });
 
 test('createTheme: throws for non-function value', t => {
 	t.throws(
 		() => chalk.createTheme({error: 'not a function'}),
-		{message: /Expected a chalk style chain/},
+		{message: /Expected a chalk style chain/v},
 	);
 	t.throws(
 		() => chalk.createTheme({error: 42}),
-		{message: /Expected a chalk style chain/},
+		{message: /Expected a chalk style chain/v},
 	);
 });
 
 test('registerTheme: throws for invalid name', t => {
-	t.throws(() => registerTheme('', chalk.createTheme({})), {message: /Expected a non-empty string/});
-	t.throws(() => registerTheme(42, chalk.createTheme({})), {message: /Expected a non-empty string/});
+	t.throws(() => registerTheme('', chalk.createTheme({})), {message: /Expected a non-empty string/v});
+	t.throws(() => registerTheme(42, chalk.createTheme({})), {message: /Expected a non-empty string/v});
 });
 
 test('registerTheme: throws for non-object theme', t => {
-	t.throws(() => registerTheme('x', 'bad'), {message: /Expected a theme object/});
+	t.throws(() => registerTheme('x', 'bad'), {message: /Expected a theme object/v});
 });
 
 // --- Debug logging ---
@@ -196,7 +196,7 @@ test('setThemeDebug: enable and disable', t => {
 	setThemeDebug(false);
 	setThemeDebug(0);
 	setThemeDebug(1);
-	t.pass();
+	t.pass(); // eslint-disable-line ava/no-useless-t-pass -- smoke test for no-throw
 });
 
 // --- Backward compatibility ---

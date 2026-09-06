@@ -1,11 +1,10 @@
 const themeRegistry = new Map();
 let activeThemeName;
 let activeTheme;
-let debugEnabled = false;
+let isDebugEnabled = false;
 
 const debugLog = (...arguments_) => {
-	if (debugEnabled) {
-		// eslint-disable-next-line no-console
+	if (isDebugEnabled) {
 		console.error('[chalk-theme]', ...arguments_);
 	}
 };
@@ -13,15 +12,11 @@ const debugLog = (...arguments_) => {
 /**
 Create a theme object from a definition.
 
-Each value in the definition should be a chalk style chain (e.g., `chalk.red.bold`).
-The returned theme object has the same keys, where each key is a callable function.
-
-@param {Record<string, Function>} definition - Style definition object.
-@param {Function} createEntry - Internal function to create a styled entry from a builder.
-@param {object} chalkInstance - The chalk instance to bind level detection to.
-@returns {Record<string, Function>} Theme object with callable style entries.
+@param {Record<string, (...args: unknown[]) => string>} definition - Style definition object.
+@param {(...args: unknown[]) => unknown} createEntry - Internal function to create a styled entry from a builder.
+@returns {Record<string, (...args: unknown[]) => string>} Theme object with callable style entries.
 */
-export const createTheme = (definition, createEntry, chalkInstance) => {
+export const createTheme = (definition, createEntry) => {
 	if (definition === null || typeof definition !== 'object' || Array.isArray(definition)) {
 		throw new TypeError('Expected a plain object as theme definition');
 	}
@@ -43,7 +38,7 @@ export const createTheme = (definition, createEntry, chalkInstance) => {
 /**
 Register a named theme in the global registry.
 
-@param {string} name - Theme name.
+@param {string} name - Unique identifier for the theme.
 @param {object} theme - Theme object (output of createTheme).
 */
 export const registerTheme = (name, theme) => {
@@ -107,5 +102,5 @@ Enable or disable debug logging.
 @param {boolean} enabled - Whether to enable debug output.
 */
 export const setThemeDebug = enabled => {
-	debugEnabled = Boolean(enabled);
+	isDebugEnabled = Boolean(enabled);
 };
