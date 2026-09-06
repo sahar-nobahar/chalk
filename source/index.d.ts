@@ -37,6 +37,28 @@ export interface ChalkInstance {
 	(...text: unknown[]): string;
 
 	/**
+	Create a theme object from a definition.
+
+	Each value in the definition should be a chalk style chain (e.g., `chalk.red.bold`).
+	The returned theme object has the same keys, where each key is a callable function.
+
+	@param definition - Style definition object.
+	@returns Theme object with callable style entries.
+
+	@example
+	```
+	const theme = chalk.createTheme({
+		error: chalk.red.bold,
+		success: chalk.green,
+	});
+
+	console.log(theme.error('Error!'));
+	console.log(theme.success('OK!'));
+	```
+	*/
+	createTheme(definition: ThemeDefinition): Theme;
+
+	/**
 	The color support for Chalk.
 
 	By default, color support is automatically detected based on the environment.
@@ -345,10 +367,124 @@ This simply means that `chalk.red.yellow.green` is equivalent to `chalk.green`.
 */
 declare const chalk: ChalkInstance;
 
+/**
+A theme entry is a callable function that applies pre-defined styles to a string.
+
+@param text - The text to style.
+@returns The styled string.
+*/
+export type ThemeEntry = (...text: unknown[]) => string;
+
+/**
+A theme definition maps semantic keys to chalk style chains.
+
+@example
+```
+const definition = {
+	error: chalk.red.bold,
+	success: chalk.green,
+};
+```
+*/
+export type ThemeDefinition = Record<string, ChalkInstance>;
+
+/**
+A theme object maps semantic keys to callable style functions.
+
+@example
+```
+const theme = chalk.createTheme({
+	error: chalk.red.bold,
+	success: chalk.green,
+});
+
+console.log(theme.error('Something failed'));
+```
+*/
+export type Theme = Record<string, ThemeEntry>;
+
+/**
+Create a theme object from a definition.
+
+Each value in the definition should be a chalk style chain (e.g., `chalk.red.bold`).
+The returned theme object has the same keys, where each key is a callable function.
+
+@param definition - Style definition object.
+@returns Theme object with callable style entries.
+
+@example
+```
+import chalk from 'chalk';
+
+const theme = chalk.createTheme({
+	error: chalk.red.bold,
+	success: chalk.green,
+});
+
+console.log(theme.error('Error!'));
+console.log(theme.success('OK!'));
+```
+*/
+export function createTheme(definition: ThemeDefinition): Theme;
+
 export const supportsColor: ColorInfo;
 
 export const chalkStderr: typeof chalk;
 export const supportsColorStderr: typeof supportsColor;
+
+/**
+Register a named theme in the global registry.
+
+@param name - Theme name.
+@param theme - Theme object (output of `createTheme`).
+
+@example
+```
+import chalk, {registerTheme, setActiveTheme} from 'chalk';
+
+const dark = chalk.createTheme({error: chalk.red.bold});
+registerTheme('dark', dark);
+setActiveTheme('dark');
+```
+*/
+export function registerTheme(name: string, theme: Theme): void;
+
+/**
+Set the active theme by name (must be registered first) or by providing a theme object directly.
+
+@param nameOrTheme - Registered theme name or a theme object.
+@param theme - Theme object (required if nameOrTheme is a string).
+
+@example
+```
+import {setActiveTheme, getActiveTheme} from 'chalk';
+
+setActiveTheme('dark');
+const theme = getActiveTheme();
+console.log(theme?.error('oops'));
+```
+*/
+export function setActiveTheme(nameOrTheme: string | Theme, theme?: Theme): void;
+
+/**
+Get the currently active theme object.
+
+@returns The active theme, or `undefined` if none is set.
+*/
+export function getActiveTheme(): Theme | undefined;
+
+/**
+Enable or disable debug logging for the theme system.
+
+@param enabled - Whether to enable debug output to stderr.
+
+@example
+```
+import {setThemeDebug} from 'chalk';
+setThemeDebug(true);
+```
+*/
+export function setThemeDebug(enabled: boolean): void;
 
 export {
 	ModifierName,

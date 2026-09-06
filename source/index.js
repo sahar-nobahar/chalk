@@ -2,6 +2,7 @@ import {
 	stringReplaceAll,
 	stringEncaseCRLFWithFirstIndex,
 } from './utilities.js';
+import {createTheme as _createTheme} from './theme.js';
 import ansiStyles from '#ansi-styles';
 import supportsColor from '#supports-color';
 
@@ -62,8 +63,44 @@ function createChalk(options) {
 	return chalkFactory(options);
 }
 
+const createThemeEntry = builder => {
+	const styler = builder[STYLER];
+	const isEmpty = builder[IS_EMPTY];
+	const generator = builder[GENERATOR];
+
+	return (...strings) => {
+		const string = strings.join(' ');
+		if (generator[LEVEL] <= 0 || !string) {
+			return isEmpty ? '' : string;
+		}
+
+		if (styler === undefined) {
+			return string;
+		}
+
+		const {openAll, closeAll} = styler;
+		let result = string;
+		let s = styler;
+		if (result.includes('\u{1B}')) {
+			while (s !== undefined) {
+				result = stringReplaceAll(result, s.close, s.open);
+				s = s.parent;
+			}
+		}
+
+		const lfIndex = result.indexOf('\n');
+		if (lfIndex !== -1) {
+			result = stringEncaseCRLFWithFirstIndex(result, closeAll, openAll, lfIndex);
+		}
+
+		return openAll + result + closeAll;
+	};
+};
+
 // eslint-disable-next-line unicorn/no-top-level-side-effects -- The prototype chain must be set up at module load.
 Object.setPrototypeOf(createChalk.prototype, Function.prototype);
+
+const createThemeOnInstance = (self, definition) => _createTheme(definition, createThemeEntry, self);
 
 for (const [styleName, style] of Object.entries(ansiStyles)) {
 	styles[styleName] = {
@@ -234,7 +271,16 @@ const applyStyle = (self, string) => {
 
 // `level` lives on the prototype rather than on each instance, so it costs nothing to construct an instance and matches how builders already expose it. It is inherited rather than own, so it does not show up in `Object.keys()`, same as for a builder.
 // eslint-disable-next-line unicorn/no-top-level-side-effects -- The style getters must be installed at module load.
-Object.defineProperties(createChalk.prototype, {...styles, level: levelDescriptor});
+Object.defineProperties(createChalk.prototype, {
+	...styles,
+	level: levelDescriptor,
+	createTheme: {
+		enumerable: true,
+		value(definition) {
+			return createThemeOnInstance(this, definition);
+		},
+	},
+});
 
 const chalk = createChalk();
 export const chalkStderr = createChalk({level: stderrColor ? stderrColor.level : 0});
@@ -258,4 +304,12 @@ export {
 	stderrColor as supportsColorStderr,
 };
 
+export {
+	registerTheme,
+	setActiveTheme,
+	getActiveTheme,
+	setThemeDebug,
+} from './theme.js';
+
 export default chalk;
+

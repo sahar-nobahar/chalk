@@ -109,6 +109,84 @@ console.log(chalk.green('Hello %s'), name);
 //=> 'Hello Sindre'
 ```
 
+## Theming
+
+Chalk supports defining and switching between named themes at runtime.
+
+### Defining a theme
+
+```js
+import chalk from 'chalk';
+
+const myTheme = chalk.createTheme({
+	error: chalk.red.bold,
+	success: chalk.green,
+	warning: chalk.hex('#FFA500').bold,
+	info: chalk.cyan,
+});
+
+console.log(myTheme.error('Something went wrong!'));
+console.log(myTheme.success('Operation completed.'));
+```
+
+Each value in the definition is a chalk style chain. Theme entries can combine multiple styles (foreground color, background color, modifiers) just like regular chalk chaining:
+
+```js
+const theme = chalk.createTheme({
+	error: chalk.red.bgBlack.bold,
+	highlight: chalk.yellow.underline.inverse,
+});
+```
+
+### Theme registry and switching
+
+For managing multiple themes (e.g., dark/light modes), use the theme registry:
+
+```js
+import chalk, {registerTheme, setActiveTheme, getActiveTheme} from 'chalk';
+
+const darkTheme = chalk.createTheme({
+	error: chalk.red.bold,
+	success: chalk.green,
+});
+
+const lightTheme = chalk.createTheme({
+	error: chalk.bold.red,
+	success: chalk.greenBright,
+});
+
+registerTheme('dark', darkTheme);
+registerTheme('light', lightTheme);
+
+// Switch between themes at runtime
+setActiveTheme('dark');
+const theme = getActiveTheme();
+console.log(theme.error('Oops!'));
+
+setActiveTheme('light');
+console.log(theme.error('Oops!'));
+```
+
+### Level fallback
+
+Theme entries respect the current `chalk.level`. At level 0 (no color support), all theme functions return plain text:
+
+```js
+const instance = new Chalk({level: 0});
+const theme = instance.createTheme({error: chalk.red.bold});
+console.log(theme.error('No colors'));
+//=> 'No colors' (no ANSI codes)
+```
+
+### Debug logging
+
+Enable debug logging to see theme registration and switching events on stderr:
+
+```js
+import {setThemeDebug} from 'chalk';
+setThemeDebug(true);
+```
+
 ## API
 
 ### chalk.`<style>[.<style>...](string, [string...])`
@@ -169,6 +247,38 @@ console.log(modifierNames.includes('bold'));
 console.log(foregroundColorNames.includes('pink'));
 //=> false
 ```
+
+### chalk.createTheme(definition)
+
+Create a theme object from a definition. Each value in the definition should be a chalk style chain. Returns an object with the same keys, where each key is a callable function.
+
+```js
+const theme = chalk.createTheme({
+	error: chalk.red.bold,
+	success: chalk.green,
+});
+
+console.log(theme.error('Error!'));
+//=> '\u{1b}[31m\u{1b}[1mError!\u{1b}[22m\u{1b}[39m' (with colors enabled)
+```
+
+Throws a `TypeError` if the definition is not a plain object or if any value is not a function.
+
+### registerTheme(name, theme)
+
+Register a named theme in the global registry. The `theme` should be an object created by `createTheme`.
+
+### setActiveTheme(nameOrTheme, theme?)
+
+Set the active theme by name (must be registered first) or by providing a theme object directly. When called with a string and a theme object, it registers and sets the theme in one step.
+
+### getActiveTheme()
+
+Returns the currently active theme object, or `undefined` if none is set.
+
+### setThemeDebug(enabled)
+
+Enable or disable debug logging for the theme system. When enabled, registration and switching events are logged to stderr.
 
 ## Styles
 

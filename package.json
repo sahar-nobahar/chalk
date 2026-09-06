@@ -65,9 +65,10 @@
 	},
 	"xo": [
 		{
-			"ignores": [
-				"source/vendor"
-			]
+		"ignores": [
+			"source/vendor",
+			"**/*.d.ts"
+		]
 		},
 		{
 			"rules": {
